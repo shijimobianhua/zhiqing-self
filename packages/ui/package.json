@@ -1,0 +1,14 @@
+{
+  "name": "@zhiqing/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./intro-session": "./src/intro-session.ts" },
+  "peerDependencies": {
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
+  },
+  "dependencies": {
+    "@zhiqing/content": "0.1.0"
+  }
+}

@@ -1,0 +1,3 @@
+'use client';
+import {useState,type ReactNode} from 'react';
+export default function Frame({children,url}:{children:ReactNode;url:string}){const [mobile,setMobile]=useState(false);return <><div className="preview-tools"><button className="outline-button" onClick={()=>setMobile(false)} aria-pressed={!mobile}>桌面预览</button><button className="outline-button" onClick={()=>setMobile(true)} aria-pressed={mobile}>390px 手机宽度预览</button><a className="text-link" href="/admin">返回本机后台</a></div>{mobile?<iframe className="preview-device" title="390px 手机宽度授权预览" src={url+'?frame=1'} style={{display:'block',width:390,height:900,maxWidth:'100%'}} />:<div className="preview-device">{children}</div>}</>;}

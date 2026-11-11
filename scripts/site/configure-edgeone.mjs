@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {root,privateRoot,config,configFile,atomic,runCLI} from './common.mjs';
+import {makers,projectCheck} from './edgeone.mjs';
+const setup=path.join(privateRoot,'setup');fs.mkdirSync(setup,{recursive:true});
+const accountText=await runCLI(['whoami'],setup);const account=accountText.match(/Account ID:\s*(\d+)/)?.[1];if(!account)throw Error('腾讯账号核对失败，请先登录');
+await runCLI(['makers','link','--name','zhiqing-shijimo','--area','overseas'],setup);
+const link=JSON.parse(fs.readFileSync(path.join(setup,'.edgeone/project.json'),'utf8'));
+atomic(configFile,{...config(),projectId:link.ProjectId,account,domainReady:config().domainReady||false});
+const project=await projectCheck(await makers());console.log(JSON.stringify({projectId:project.projectId,name:project.name,area:project.area,presetDomain:project.presetDomain,account}));

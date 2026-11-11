@@ -1,0 +1,3 @@
+import type {MetadataRoute} from 'next';import {getGraph} from '../server/public-data';
+export const dynamic='force-dynamic';
+export default async function sitemap():Promise<MetadataRoute.Sitemap>{const origin=process.env.SITE_ORIGIN;if(!origin)return [];const g=await getGraph();return [...['/','/works','/about','/product-in-context',...(g.notes.length?['/notes']:[])].map(p=>({url:new URL(p,origin).href})),...(g.data.contextArticles??[]).map(n=>({url:new URL('/product-in-context/'+n.slug,origin).href,lastModified:n.updatedAt||n.publishedAt})),...g.works.map(w=>({url:new URL('/works/'+w.slug,origin).href,lastModified:w.updatedAt||w.publishedAt})),...g.notes.map(n=>({url:new URL('/notes/'+n.slug,origin).href,lastModified:n.updatedAt||n.publishedAt}))];}

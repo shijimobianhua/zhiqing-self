@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+import fs from 'node:fs';
+process.env.T3_ENABLED='1';
+const {pool}=await import('../apps/web/src/server/t3/db.ts');
+const {defaults,normalize,validate,publicDTO}=await import('../apps/web/src/server/t4/model.ts');
+const {publicGraph}=await import('../apps/web/src/server/t4/content.ts');
+const {approvedGraph}=await import('../apps/web/src/server/site-release/export.ts');
+const {validatePublicGraph,contentHead}=await import('../packages/content/src/index.ts');
+const {publicFields}=await import('../apps/web/src/server/t4/public-fields.ts');
+const c=await pool().connect(),checks=[];
+try{
+ await c.query('BEGIN');await c.query('SELECT pg_advisory_xact_lock(842674,4)');
+ const before=(await c.query('SELECT count(*)::int n FROM zq_content')).rows[0].n;
+ const id=randomUUID(),draft=normalize('context',{...defaults('context'),title:'仅事务内的栏目检查',slug:'transaction-context-check',summary:'此记录不会提交到数据库或发布。',productName:'检查产品',productURL:'https://example.com',sections:[{id:'context',title:'使用情境',paragraphs:['验证独立文章正文。'],blocks:[{type:'paragraph',text:'图文块仍使用既有编辑结构。'}]}]});
+ validate('context',draft,[],[],[]);checks.push('context normalization and required product fields');
+ assert.throws(()=>validate('context',{...draft,productURL:'javascript:alert(1)'},[],[],[]));checks.push('unsafe product URL rejected');
+ const view=publicDTO('context',id,draft,1,new Date().toISOString());assert.equal(view.sections[0].text,'验证独立文章正文。');
+ const safe=publicFields('context',{...view,password:'never export'});assert(!('password'in safe));assert.equal(safe.productName,draft.productName);checks.push('article DTO and private field allowlist');
+ await c.query("INSERT INTO zq_documents(id,kind,draft) VALUES($1,'context',$2)",[id,draft]);
+ assert(!(await publicGraph(c)).data.contextArticles.some(a=>a.id===id));checks.push('real PostgreSQL draft excluded');
+ await c.query('INSERT INTO zq_paths(collection,slug,object_id) VALUES($1,$2,$3)',['product-in-context',draft.slug,id]);
+ await c.query('ROLLBACK');await c.query('BEGIN');await c.query('SELECT pg_advisory_xact_lock(842674,4)');
+ await c.query("INSERT INTO zq_documents(id,kind,draft,published,publication_version,public_slug) VALUES($1,'context',$2,$3,1,$4)",[id,draft,{view,mediaIds:[],draftHash:'transaction-check'},draft.slug]);
+ const graph=await publicGraph(c);assert(graph.data.contextArticles.some(a=>a.id===id));assert(!graph.notes.some(a=>a.id===id));validatePublicGraph(graph.data,graph.works,graph.notes);checks.push('independent published collection in real PostgreSQL');
+ assert(!(await approvedGraph(c)).data.contextArticles.some(a=>a.id===id));checks.push('unapproved content excluded from export');
+ await c.query('INSERT INTO zq_site_release_approvals(content_id,publication_version) VALUES($1,1)',[id]);
+ assert((await approvedGraph(c)).data.contextArticles.some(a=>a.id===id));assert(contentHead('/product-in-context/'+draft.slug,graph.data,graph.works,graph.notes,true).title.startsWith(draft.title));checks.push('approved export and detail metadata');
+ await c.query('UPDATE zq_documents SET published=NULL WHERE id=$1',[id]);assert(!(await approvedGraph(c)).data.contextArticles.some(a=>a.id===id));checks.push('withdrawal excluded from export');
+ await c.query('ROLLBACK');assert.equal((await pool().query('SELECT count(*)::int n FROM zq_content')).rows[0].n,before);checks.push('test rollback left no fake articles');
+ fs.mkdirSync('docs/verification-desktop-20261110',{recursive:true});fs.writeFileSync('docs/verification-desktop-20261110/context-tests.json',JSON.stringify({passed:true,checks,realPostgreSQL:true,testRecordsCommitted:false},null,2));console.log(JSON.stringify({passed:true,checks}));
+}finally{await c.query('ROLLBACK').catch(()=>{});c.release();await pool().end();}

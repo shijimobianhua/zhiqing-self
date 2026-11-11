@@ -1,0 +1,10 @@
+{
+  "name": "@zhiqing/adapters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@zhiqing/content": "0.1.0"
+  }
+}

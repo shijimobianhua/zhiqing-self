@@ -1,0 +1,37 @@
+{
+  "name": "zhiqing-web-s0",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.92.0",
+    "@zhiqing/adapters": "0.1.0",
+    "@zhiqing/content": "0.1.0",
+    "@zhiqing/design": "0.1.0",
+    "@zhiqing/ui": "0.1.0",
+    "graphql": "16.11.0",
+    "next": "16.4.3",
+    "payload": "3.92.0",
+    "pdf-lib": "1.17.1",
+    "pg": "8.20.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/pg": "8.20.0",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  }
+}

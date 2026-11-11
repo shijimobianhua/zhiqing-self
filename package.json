@@ -1,0 +1,67 @@
+{
+  "name": "zhiqing-self",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.22.1 <25",
+    "npm": ">=11 <12"
+  },
+  "packageManager": "npm@11.16.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:preview": "npm run dev -w apps/preview -- --port 5173",
+    "dev:web": "npm run dev -w apps/web -- --port 3000",
+    "build": "npm run build:sites",
+    "build:sites": "node scripts/prepare-assets.mjs && npm run build -w apps/preview && node scripts/prepare-static-routes.mjs",
+    "build:web": "node scripts/prepare-assets.mjs && npm run build -w apps/web",
+    "start:web": "npm run start -w apps/web -- --port 3000",
+    "preview": "npm run preview -w apps/preview -- --port 5173",
+    "typecheck": "tsc -p apps/preview/tsconfig.json --noEmit && npm run typecheck -w apps/web",
+    "test:contracts": "node scripts/test-contracts.mjs",
+    "check:snapshot": "node scripts/check-snapshot.mjs",
+    "cms:init": "node scripts/t4-bootstrap.mjs",
+    "cms:start": "node scripts/t3-launch.mjs db-start",
+    "cms:stop": "node scripts/t3-launch.mjs db-stop",
+    "cms:credentials": "node scripts/t3-launch.mjs credentials",
+    "cms:recovery": "node scripts/t3-launch.mjs recovery",
+    "cms:launch": "node scripts/t3-launch.mjs start",
+    "cms:shutdown": "node scripts/t3-launch.mjs stop",
+    "test:cms:http": "node scripts/test-t3-http.mjs",
+    "test:cms:auth": "node scripts/test-t3-auth.mjs",
+    "check:cms:final": "node scripts/verify-t3-final.mjs",
+    "cms:migrate": "node scripts/t4-init.mjs",
+    "cms:isolated": "node scripts/t4-isolated.mjs start",
+    "cms:isolated:stop": "node scripts/t4-isolated.mjs stop",
+    "cms:isolated:credentials": "node scripts/t4-isolated.mjs credentials",
+    "test:cms:t4": "node scripts/test-t4-http.mjs",
+    "test:cms:t4:auth": "node scripts/test-t4-auth.mjs",
+    "test:cms:t4:isolated": "node scripts/test-t4-isolated.mjs",
+    "snapshot:t4": "node scripts/t4-snapshot.mjs",
+    "cms:media:audit": "node scripts/t4-media-audit.mjs",
+    "snapshot:t5": "node scripts/t4-snapshot.mjs T5-R1",
+    "site:export": "node scripts/site/cli.mjs export",
+    "site:prepare": "node scripts/site/cli.mjs prepare",
+    "site:build": "node scripts/site/cli.mjs build",
+    "site:check": "node scripts/site/cli.mjs check",
+    "site:publish": "node scripts/site/cli.mjs publish",
+    "site:status": "node scripts/site/cli.mjs status",
+    "site:rollback": "node scripts/site/cli.mjs rollback",
+    "desktop:install": "node scripts/desktop.mjs install",
+    "desktop:record-build": "node scripts/desktop.mjs record-build"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "react-dom": "19.2.1",
+    "@types/react-dom": "19.2.3",
+    "react": "19.2.1",
+    "@types/react": "19.2.7",
+    "esbuild": "0.28.2"
+  }
+}

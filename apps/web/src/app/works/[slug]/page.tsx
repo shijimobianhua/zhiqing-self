@@ -1,0 +1,5 @@
+import {notFound,permanentRedirect} from 'next/navigation';
+import {WorkDetailView} from '@zhiqing/ui';import {lookupPath} from '../../../server/t4/content';import {getGraph} from '../../../server/public-data';import {isEnabled} from '../../../server/t3/config';import {metadataFor} from '../../metadata';
+export const dynamic='force-dynamic';
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}){return metadataFor('/works/'+(await params).slug);}
+export default async function WorkPage({params}:{params:Promise<{slug:string}>}){const {slug}=await params;const g=await getGraph();const result=isEnabled()?await lookupPath('works',slug):null;if(result?.redirect)permanentRedirect(result.redirect);const work=g.works.find(w=>w.slug===slug);if(!work)notFound();const related=work.relatedWorkIds?.length?g.works.find(w=>work.relatedWorkIds!.includes(w.id)):undefined;return <WorkDetailView work={work} publicWorks={g.works} notes={g.notes} related={related} relatedWorks={g.works.filter(w=>work.relatedWorkIds?.includes(w.id))} />;}
